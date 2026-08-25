@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# ML artifacts
+*.pt
+*.pth
+*.ckpt
+*.onnx
+models/
+checkpoints/
+data/
+
+# Logs
+*.log
+logs/
+
+# Secrets / environment
+.env
+.env.*
+*.secret
+secrets/
