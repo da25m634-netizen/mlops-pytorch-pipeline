@@ -7,6 +7,7 @@ import yaml
 
 from src.dataset import get_dataloaders
 from src.model import get_model
+import os
 
 
 def load_config(config_path: str) -> dict:
@@ -137,7 +138,10 @@ def main():
 
     # Docker path
     config_path = Path(
-        "/app/configs/training_config.yaml"
+        os.getenv(
+            "TRAINING_CONFIG",
+            "configs/training_config.yaml",
+        )
     )
 
     # Local development path
@@ -148,8 +152,8 @@ def main():
 
     if not config_path.exists():
         raise FileNotFoundError(
-            "training_config.yaml was not found."
-        )
+            f"Training configuration not found: {config_path}"
+    )
 
     config = load_config(
         str(config_path)

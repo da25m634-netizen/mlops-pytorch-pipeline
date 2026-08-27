@@ -38,7 +38,7 @@ CIFAR10_STD = [
 
 MODEL_PATH = os.getenv(
     "MODEL_PATH",
-    "artifacts/model.pt",
+    "checkpoints/model.pt",
 )
 
 
@@ -139,7 +139,7 @@ def health():
 
 @app.post("/predict")
 async def predict(
-    file: UploadFile = File(...),
+    image: UploadFile = File(...),
 ):
     if model is None:
         raise HTTPException(
@@ -147,19 +147,19 @@ async def predict(
             detail="Model is not loaded",
         )
 
-    if not file.content_type:
+    if not image.content_type:
         raise HTTPException(
             status_code=400,
             detail="Missing content type",
         )
 
-    if not file.content_type.startswith("image/"):
+    if not image.content_type.startswith("image/"):
         raise HTTPException(
             status_code=400,
             detail="Uploaded file must be an image",
         )
 
-    image_bytes = await file.read()
+    image_bytes = await image.read()
 
     try:
         image = Image.open(

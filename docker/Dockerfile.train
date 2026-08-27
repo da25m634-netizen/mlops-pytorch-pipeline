@@ -1,0 +1,29 @@
+# Stage 1: Base with dependencies
+
+FROM python:3.11-slim AS base
+
+WORKDIR /app
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+COPY requirements/train.txt /tmp/train.txt
+
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r /tmp/train.txt
+
+
+# Stage 2: Training runtime
+
+FROM base AS training
+
+WORKDIR /app
+
+COPY src/ ./src/
+COPY configs/ ./configs/
+
+RUN mkdir -p /app/data /app/checkpoints
+
+ENV TRAINING_CONFIG=/app/configs/training_config.yaml
+
+ENTRYPOINT ["python", "-m", "src.train"]
