@@ -1,0 +1,76 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: model-training
+  namespace: ml-training
+  labels:
+    app: model-training
+
+spec:
+  backoffLimit: 2
+
+  template:
+    metadata:
+      labels:
+        app: model-training
+
+    spec:
+      restartPolicy: Never
+
+      initContainers:
+        - name: prepare-storage
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              mkdir -p /storage/data
+              mkdir -p /storage/checkpoints
+
+          volumeMounts:
+            - name: ml-storage
+              mountPath: /storage
+
+      containers:
+        - name: trainer
+          image: mlops-train:v1
+
+          imagePullPolicy: IfNotPresent
+
+          env:
+            - name: TRAINING_CONFIG
+              value: /app/configs/training_config.yaml
+
+            - name: TORCH_NUM_THREADS
+              value: "2"
+
+          resources:
+            requests:
+              cpu: "2"
+              memory: "4Gi"
+
+            limits:
+              cpu: "2"
+              memory: "4Gi"
+
+          volumeMounts:
+            - name: training-config
+              mountPath: /app/configs
+              readOnly: true
+
+            - name: ml-storage
+              mountPath: /app/data
+              subPath: data
+
+            - name: ml-storage
+              mountPath: /app/checkpoints
+              subPath: checkpoints
+
+      volumes:
+        - name: training-config
+          configMap:
+            name: training-config
+
+        - name: ml-storage
+          persistentVolumeClaim:
+            claimName: ml-storage
