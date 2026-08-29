@@ -42,7 +42,7 @@ def train_one_epoch(
     correct = 0
     total = 0
 
-    for inputs, targets in loader:
+    for batch_idx, (inputs, targets) in enumerate(loader, start=1):
         inputs = inputs.to(device)
         targets = targets.to(device)
 
@@ -72,6 +72,19 @@ def train_one_epoch(
             .sum()
             .item()
         )
+
+        # Log training progress every 100 batches
+        if batch_idx % 100 == 0:
+            print(
+                json.dumps(
+                    {
+                        "event": "training_progress",
+                        "batch": batch_idx,
+                        "total_batches": len(loader),
+                    }
+                ),
+                flush=True,
+            )
 
     average_loss = total_loss / total
     accuracy = correct / total
@@ -135,6 +148,11 @@ def main():
     # ---------------------------------------------------------
     # Locate configuration file
     # ---------------------------------------------------------
+
+    torch_threads = int(os.getenv("TORCH_NUM_THREADS", "2"))
+
+    torch.set_num_threads(torch_threads)
+    torch.set_num_interop_threads(torch_threads)
 
     # Docker path
     config_path = Path(
