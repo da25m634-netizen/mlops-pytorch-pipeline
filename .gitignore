@@ -38,3 +38,11 @@ logs/
 .env.*
 *.secret
 secrets/
+
+# Docker
+data/
+artifacts/
+checkpoints/
+
+*.pt
+*.pth
